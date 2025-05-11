@@ -1,5 +1,6 @@
-import msgspec
 from typing import TypedDict
+
+import msgspec
 
 
 class State(TypedDict): ...
