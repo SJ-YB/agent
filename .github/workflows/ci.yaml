@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.13"]
     steps:
       - uses: actions/checkout@v4
 
@@ -35,13 +35,13 @@ jobs:
 
       - name: Install poetry
         run: |
-          curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.8.2 python -
+          curl -sSL https://install.python-poetry.org | POETRY_VERSION=2.1.2 python -
           echo "$HOME/.local/bin" >> $GITHUB_PATH  
 
       - name: Run Poetry install
         run: |
           poetry config virtualenvs.in-project true
-          poetry install --no-interaction --no-root
+          poetry install --no-interaction
 
       - name: Run poe check
         run: poetry run poe check

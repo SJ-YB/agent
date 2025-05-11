@@ -1,0 +1,72 @@
+name: Build Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_increment:
+        type: choice
+        description: Semantic versioning
+        default: "patch"
+        options:
+        - major
+        - minor
+        - patch
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate-new-tag:
+    runs-on: ubuntu-latest
+
+    outputs:
+      new-tag: ${{ steps.generate_tag.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create new Semantic Version
+        id: generate_tag
+        uses: zwaldowski/semver-release-action@v4
+        with:
+          bump: ${{ inputs.version_increment }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-docker-and-push:
+    needs: [ generate-new-tag ]
+    name: build Docker and push to AWS ECR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 2. GitHub OIDC를 이용해 AWS 자격증명 획득
+      # https://docs.github.com/ko/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
+      - name: Configure AWS credentials using GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
+          aws-region: ${{ secrets.AWS_ECR_REGION }}
+
+      # 3. AWS ECR Login
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      # 4. Docker 이미지 빌드
+      - name: Docker Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ secrets.AWS_ECR_REPOSITORY}}:agent-${{ needs.generate-new-tag.outputs.new-tag }}
