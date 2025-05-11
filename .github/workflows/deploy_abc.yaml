@@ -1,0 +1,50 @@
+name: Deploy - ABC
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  service-name: 'abc'
+
+jobs:
+  update_version_in_helm_chart:
+    name: Update version in Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Get latest semver tag
+        id: get_latest_version
+        run: |
+          latest_version=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+          echo "Latest version: $latest_version"
+          echo "LATEST_VERSION=$latest_version" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          repository: 'SJ-YB/chart'
+          ssh-key: ${{ secrets.CHART_REPO_SSH_PRIVATE_KEY }}
+
+      - name: update tag
+        uses: mikefarah/yq@v4
+        with:
+          cmd: yq -i '
+               .spec.template.spec.containers[0].image = "${{ secrets.AWS_ECR_REPOSITORY }}:agent-${{ steps.get_latest_version.outputs.LATEST_VERSION }}"
+               ' applications/${{ env.service-name }}-deployment.yaml
+
+      - name: Commit and push changes
+        run: |
+          git add .
+          git config user.name github-actions
+          git config user.email "<>"
+          git commit -m "fix: bump up image version of ${{ env.service-name }}"
+          git push

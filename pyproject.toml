@@ -1,13 +1,22 @@
 [tool.poetry]
-name = "python-template"
+name = "agent"
 version = "0.1.0"
-description = ""
-authors = ["Youngbeom Choi <helloybz@gmail.com>"]
+description = "Graph-based AI Agent Repository of SJYB"
+authors = [
+    "Sijin Kim <tlwlsdi0306@gmail.com>",
+    "Youngbeom Choi <helloybz@gmail.com>"
+]
 readme = "README.md"
+package-mode=false
 
 [tool.poetry.dependencies]
 python = "^3.12"
 poethepoet = "*"
+fastapi = "*"
+pydantic = "*"
+click = "*"
+uvicorn = "*"
+httpx = "*"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
@@ -27,25 +36,60 @@ build-backend = "poetry.core.masonry.api"
     cmd  = "ruff format ."
 
     [tool.poe.tasks.format-check]
-    help = "Run Ruff formatter"
+    help = "Run Ruff formatter without editing. (It is for ensuring that the codes are already formatted.)"
     cmd  = "ruff format --check ."
 
-    [tool.poe.tasks.ruff-lint]
-    help = "lint check"
-    cmd  = "ruff check ./src"
-
-    [tool.poe.tasks.types]
+    [tool.poe.tasks.type-mypy]
     help = "Run the type checker"
     cmd  = "mypy src --ignore-missing-imports"
 
-    [tool.poe.tasks.lint]
-    help = "Run the linter"
+    [tool.poe.tasks.lint-ruff]
+    help = "Run ruff-linter"
+    cmd  = "ruff check ./src --select I --fix"
+
+    [tool.poe.tasks.lint-pylint]
+    help = "Run pylint"
     cmd  = "pylint ./src"
+
+    [tool.poe.tasks.lint]
+    help = "Run the linters"
+    sequence = ["lint-ruff", "lint-pylint"]
 
     [tool.poe.tasks.test]
     help = "Run unit and feature tests"
-    cmd  = "pytest --cov=src tests/ --junitxml=build/xunit-result.xml --cov-report=xml:build/xunit-coverage.xml"
+    cmd  = "pytest --cov=src tests/"
 
     [tool.poe.tasks.check]
     help     = "Run all checks on the code base"
-    sequence = ["format-check", "ruff-lint", "types", "lint", "test"]
+    sequence = ["format-check", "lint", "type-mypy", "test"]
+
+    [tool.poe.tasks.web]
+    help  = "Run web app on local"
+    cmd   = "python src/main.py web run"
+    env = {PYTHONPATH="${PYTHONPATH}:/src"}
+
+    [tool.poe.tasks.clean]
+    help = "Remove generated files"
+    cmd  = """
+        rm -rf .coverage
+            .mypy_cache
+            .pytest_cache
+            .ruff_cache
+            ./**/__pycache__
+    """
+
+[tool.coverage.run]
+branch = true
+omit = ["*/main.py", "*/commands.py"]
+relative_files = true
+
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "if __name__ == .__main__.:",
+  "class .*\\bProtocol\\):",
+  "@(abc\\.)?abstractmethod"
+]
+fail_under = 80
+show_missing = true
