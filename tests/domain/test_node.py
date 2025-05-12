@@ -3,7 +3,8 @@ import msgspec
 from src.domain import Node, CharacterAppendingNode
 
 
-def test_create_node(sample_node_spec):
+def test_create_node():
+    sample_node_spec = {"id": "node_1", "attr": "test"}
     node = msgspec.convert(sample_node_spec, type=Node)
 
     assert isinstance(node, Node)
@@ -11,8 +12,9 @@ def test_create_node(sample_node_spec):
     assert node.attr == "test"
 
 
-def test_create_a_char_appending_node(abc_node_spec):
-    node = msgspec.convert(abc_node_spec, type=CharacterAppendingNode)
+def test_create_a_char_appending_node():
+    sample_node_spec = {"id": "node_1", "attr": "test", "char": "A"}
+    node = msgspec.convert(sample_node_spec, type=CharacterAppendingNode)
     state = {"test": ""}
 
     new_state = node(state)
@@ -21,9 +23,15 @@ def test_create_a_char_appending_node(abc_node_spec):
     assert new_state.get("test") == "A"
 
 
-def test_cteate_char_append_nodes_from_spec(abc_node_specs):
+def test_cteate_char_append_nodes_from_spec():
+    sample_node_specs = [
+        {"id": "node_1", "attr": "test", "char": "A"},
+        {"id": "node_2", "attr": "test", "char": "B"},
+        {"id": "node_3", "attr": "test", "char": "C"},
+    ]
+
     nodes = []
-    for spec in abc_node_specs:
+    for spec in sample_node_specs:
         nodes.append(msgspec.convert(spec, type=CharacterAppendingNode))
     state = {"test": ""}
 
