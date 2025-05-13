@@ -17,6 +17,7 @@ pydantic = "*"
 click = "*"
 uvicorn = "*"
 httpx = "*"
+msgspec = "*"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
