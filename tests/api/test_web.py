@@ -6,7 +6,10 @@ from fastapi.testclient import TestClient
     "endpoint", [("/"), ("healthz"), ("readyz"), ("livez"), ("startupz")]
 )
 @pytest.mark.anyio
-def test_default_endpoint(client: TestClient, endpoint: str) -> None:
-    response = client.get(endpoint)
+def test_basic_endpoint(
+    fake_chat_client: TestClient,
+    endpoint: str,
+) -> None:
+    response = fake_chat_client.get(endpoint)
     assert response.status_code == 200
     assert response.json() == {"status": "OK"}

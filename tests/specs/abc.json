@@ -1,0 +1,27 @@
+{
+    "type": "GraphSpec",
+    "state_schema": "single_message",
+    "nodes": [
+        {
+            "type": "static_value",
+            "id": "return_a",
+            "value": "a"
+        },
+        {
+            "type": "static_value",
+            "id": "return_b",
+            "value": "b"
+        },
+        {
+            "type": "static_value",
+            "id": "return_c",
+            "value": "c"
+        }
+    ],
+    "edges": [
+        {"src": "start", "dst": "return_a"},
+        {"src": "return_a", "dst": "return_b"},
+        {"src": "return_b", "dst": "return_c"},
+        {"src": "return_c", "dst": "end"}
+    ]
+}
