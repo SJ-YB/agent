@@ -1,3 +1,5 @@
+from typing import Any, Type, cast
+
 import msgspec
 from langgraph.graph.state import CompiledStateGraph
 
@@ -12,14 +14,14 @@ class GraphService:
     def __init__(
         self,
         graph: CompiledStateGraph,
-        state_schema_class: type[StateTypes],
     ) -> None:
         self.graph = graph
-        self.state_schema_class = state_schema_class
 
     def do(self, state: StateTypes) -> StateTypes:
-        result_state = self.graph.invoke(state)
+        return self._create_state(self.graph.invoke(state))
+
+    def _create_state(self, graph_output: dict[str, Any] | Any) -> StateTypes:
         return msgspec.convert(
-            result_state,
-            type=self.state_schema_class,
+            graph_output,
+            type=cast(Type[StateTypes], self.graph.builder.schema),
         )

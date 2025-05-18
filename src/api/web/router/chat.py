@@ -32,7 +32,7 @@ class ChatResponseView(BaseModel):
         message = state.messages[-1]
         if not isinstance(message, AIMessage):
             raise RuntimeError("Chat Model didn't answer yet.")
-        return cls(id=state.id, message=message.text)
+        return cls(id=state.id, message=message.text())
 
 
 @router.post("/v1/chat")

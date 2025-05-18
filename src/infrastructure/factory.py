@@ -1,15 +1,14 @@
 from typing import cast
 
 from httpx import AsyncClient
-from loguru import logger
 
 
 def create_http_client(
+    enabled: bool,
     api_key: str | None,
     base_url: str | None,
 ) -> AsyncClient | None:
-    logger.debug(api_key)
-    if api_key is None:
+    if not enabled:
         return None
 
     headers = {
