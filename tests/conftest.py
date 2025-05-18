@@ -15,9 +15,8 @@ from src.container import Container
 from src.domain.entity.node import NodeTypes
 from src.domain.entity.node.base import StateDiff, Node
 from src.domain.entity.state.messages import SingleMessageState
-from src.domain.factory import GraphSpec, create_graph
 from src.domain.service.graph import GraphService
-from src.settings import ServiceName, Settings
+from src.settings import Settings
 
 
 @pytest.fixture

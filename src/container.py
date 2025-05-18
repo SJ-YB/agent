@@ -2,31 +2,38 @@ from dependency_injector import containers, providers
 
 from src.application.agent import AgentApplication
 from src.domain.entity.state.messages import MessageListState, SingleMessageState
-from src.domain.factory import create_edges, create_graph, create_nodes
+from src.infrastructure.factory import create_edges, create_graph, create_nodes
 from src.domain.service.graph import GraphService
 
 
-class Infrastructure(containers.DeclarativeContainer): ...
 
+
+class ChatModelContainer(containers.DeclarativeContainer):
+    lm = providers.Selector(
+                
+    )
 
 class GraphContainer(containers.DeclarativeContainer):
     graph_config = providers.Configuration()
 
-    state_schema_class = providers.Selector(
-        graph_config.state_schema,
-        single_message=providers.Callable(SingleMessageState),
-        message_list=providers.Callable(MessageListState),
+    state_schema_class = providers.Resource(
+        providers.Selector(
+            graph_config.state_schema,
+            single_message=providers.Callable(SingleMessageState),
+            message_list=providers.Callable(MessageListState),
+        )
     )
 
-    nodes = providers.Singleton(
+
+    nodes = providers.Resource(
         create_nodes,
-        node_=providers.ProvidedInstance(
+        node_configs=providers.ProvidedInstance(
             provides=graph_config.nodes,
         ),
     )
-    edges = providers.Singleton(
+    edges = providers.Resource(
         create_edges,
-        edge_specs=providers.ProvidedInstance(
+        edge_config=providers.ProvidedInstance(
             provides=graph_config.edges,
         ),
     )

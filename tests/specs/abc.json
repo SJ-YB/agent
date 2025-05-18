@@ -1,5 +1,4 @@
 {
-    "type": "GraphSpec",
     "state_schema": "single_message",
     "nodes": [
         {

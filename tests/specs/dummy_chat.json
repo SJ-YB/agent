@@ -1,12 +1,13 @@
 {
-    "type": "GraphSpec",
     "state_schema": "message_list",
     "nodes": [
         {
             "type": "chat",
             "id": "dummy_chat",
             "llm": {
-                "type": "fake"
+                "type": "openai",
+                "model": "gpt-3",
+                "temp":
             }
         }
     ],
