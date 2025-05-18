@@ -1,7 +1,7 @@
 from enum import StrEnum, auto
 from pathlib import Path
 
-from openai import BaseModel
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
