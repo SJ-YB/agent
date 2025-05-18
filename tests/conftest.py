@@ -12,18 +12,43 @@ from langchain_core.language_models.fake_chat_models import FakeChatModel
 
 from src.api.web.app import create_web_app
 from src.container import Container
-from src.domain.entity.node import NodeTypes
-from src.domain.entity.node.base import StateDiff, Node
-from src.domain.entity.state.messages import SingleMessageState
-from src.domain.factory import GraphSpec, create_graph
+from src.domain.entity.state.messages import MessageListState, SingleMessageState
+from src.domain.factory import create_edges, create_graph, create_lms, create_nodes
 from src.domain.service.graph import GraphService
-from src.settings import ServiceName, Settings
+from src.settings import Settings
 
 
 @pytest.fixture
-def fake_abc_graph_app_config_dict() -> dict[str, Any]:
-    with open(Path("./tests/specs/abc.json"), "r", encoding="utf-8") as io:
+def fake_chat_graph_spec_dict() -> dict[str, Any]:
+    with open(Path("./tests/specs/fake_chat.json"), "r", encoding="utf-8") as io:
         return json.load(io)
+
+
+@pytest.fixture
+def fake_llm() -> FakeChatModel:
+    return FakeChatModel()
+
+
+@pytest.fixture
+def fake_dummy_chat_graph(
+    fake_chat_graph_spec_dict: dict[str, Any],
+    fake_llm: FakeChatModel,
+) -> CompiledStateGraph:
+    lms = create_lms(
+        lm_specs=fake_chat_graph_spec_dict["lms"],
+    )
+    nodes = create_nodes(
+        node_specs=fake_chat_graph_spec_dict["nodes"],
+        language_models=lms,
+    )
+    edges = create_edges(
+        edge_specs=fake_chat_graph_spec_dict["edges"],
+    )
+    return create_graph(
+        state_schema_class=fake_chat_graph_spec_dict["state_schema"],
+        nodes=nodes,
+        edges=edges,
+    )
 
 
 @pytest.fixture(scope="session")
@@ -59,51 +84,9 @@ def fake_chat_client() -> TestClient:
 
 
 @pytest.fixture
-def fake_graph(fake_abc_graph_app_config_dict: dict[str, Any]) -> CompiledStateGraph:
-    class StaticValueNode(Node[SingleMessageState], tag="static_value"):
-        """
-        Unit test 용 임시 Node.
-        {"message": `value`} StateDiff를 반환합니다.
-        """
-
-        value: str
-
-        def _process(self, state: SingleMessageState) -> StateDiff:
-            return cast(StateDiff, {"message": self.value})
-
-    FakeNodeTypes: TypeAlias = NodeTypes | StaticValueNode
-
-    class FakeGraphSpec(GraphSpec):
-        nodes: list[FakeNodeTypes]
-
-    spec = msgspec.convert(
-        fake_abc_graph_app_config_dict,
-        type=FakeGraphSpec,
-    )
-
-    graph_builder = StateGraph(state_schema=SingleMessageState)
-
-    for node in spec.nodes:
-        graph_builder.add_node(node=node.id, action=node)
-
-    for edge in spec.edges:
-        src_id = START if edge.src == "start" else edge.src
-        dst_id = END if edge.dst == "end" else edge.dst
-        graph_builder.add_edge(src_id, dst_id)
-
-    return graph_builder.compile()
-
-
-@pytest.fixture
 def fake_graph_service(
-    fake_graph: CompiledStateGraph,
+    fake_dummy_chat_graph: CompiledStateGraph,
 ) -> GraphService:
     return GraphService(
-        fake_graph,
-        state_schema_class=SingleMessageState,
+        fake_dummy_chat_graph,
     )
-
-
-@pytest.fixture
-def fake_llm() -> FakeChatModel:
-    return FakeChatModel()

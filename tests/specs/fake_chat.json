@@ -1,0 +1,21 @@
+{
+    "state_schema": "message_list",
+    "lms": [
+        {
+            "id": "fake_chat",            
+            "provider": "langchain",
+            "model": "fake"
+        }
+    ],
+    "nodes": [
+        {
+            "type": "chat",
+            "id": "fake_chat",
+            "reasoning_model":"fake_chat"
+        }
+    ],
+    "edges": [
+        {"src": "start", "dst": "fake_chat"},
+        {"src": "fake_chat", "dst": "end"}
+    ]
+}

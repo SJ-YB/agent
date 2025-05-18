@@ -8,10 +8,6 @@ from src.domain.entity.state import StateT
 StateDiff: TypeAlias = dict[str, Any]
 
 
-class NodeSpec(msgspec.Struct):
-    id: str
-
-
 class Node(msgspec.Struct, Generic[StateT]):
     """
     Node class for LangGraph's Graph.

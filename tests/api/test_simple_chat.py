@@ -12,4 +12,4 @@ def test_chat_endpoint_response(
         },
     )
     assert response.status_code == 200
-    assert response.json() == {"status": "OK"}
+    assert response.json() == {"id": "test_id", "message": "fake response"}
