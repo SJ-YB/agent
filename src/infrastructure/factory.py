@@ -1,3 +1,5 @@
+from typing import cast
+
 from httpx import AsyncClient
 from loguru import logger
 
@@ -17,5 +19,5 @@ def create_http_client(
 
     return AsyncClient(
         headers=headers,
-        base_url=base_url,
+        base_url=cast(str, base_url),
     )

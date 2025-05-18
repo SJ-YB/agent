@@ -1,6 +1,6 @@
 from langchain_core.language_models.chat_models import BaseChatModel
 
-from src.domain.entity.node.base import Node, NodeSpec, StateDiff
+from src.domain.entity.node.base import Node, StateDiff
 from src.domain.entity.state.messages import MessageListState
 
 

@@ -26,13 +26,13 @@ class GraphContainer(containers.DeclarativeContainer):
         message_list=providers.Callable(MessageListState),
     )
 
-    nodes = providers.Singleton(
+    nodes = providers.Resource(
         create_nodes,
-        node_=providers.ProvidedInstance(
+        node_specs=providers.ProvidedInstance(
             provides=graph_config.nodes,
         ),
     )
-    edges = providers.Singleton(
+    edges = providers.Resource(
         create_edges,
         edge_specs=providers.ProvidedInstance(
             provides=graph_config.edges,
