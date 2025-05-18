@@ -4,9 +4,17 @@ from src.application.agent import AgentApplication
 from src.domain.entity.state.messages import MessageListState, SingleMessageState
 from src.domain.factory import create_edges, create_graph, create_nodes
 from src.domain.service.graph import GraphService
+from src.infrastructure.factory import create_http_client
 
 
-class Infrastructure(containers.DeclarativeContainer): ...
+class InfrastructureContainer(containers.DeclarativeContainer):
+    env_config = providers.Configuration()
+
+    openai = providers.Resource(
+        create_http_client,
+        api_key=env_config.infrastructure.openai.api_key,
+        base_url=env_config.infrastructure.openai.base_url,
+    )
 
 
 class GraphContainer(containers.DeclarativeContainer):
@@ -51,6 +59,11 @@ class ServiceContainer(containers.DeclarativeContainer):
 class Container(containers.DeclarativeContainer):
     env_config = providers.Configuration()
     graph_config = providers.Configuration()
+
+    infrastructure_cont = providers.Container(
+        InfrastructureContainer,
+        env_config=env_config,
+    )
 
     graph_cont = providers.Container(
         GraphContainer,

@@ -1,5 +1,3 @@
-from typing import Any
-
 import msgspec
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
