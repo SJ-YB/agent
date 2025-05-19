@@ -17,7 +17,7 @@ from src.domain.vo.edge import Edge, NodeId
 
 def create_lms(
     lm_specs: list[dict[str, str]],
-    clients: dict[str, AsyncClient] = {},
+    clients: dict[str, AsyncClient],
 ) -> dict[str, BaseChatModel]:
     lms: dict[str, BaseChatModel] = {}
 
@@ -26,7 +26,7 @@ def create_lms(
         match (lm_spec["provider"], lm_spec["model"]):
             case ("langchain", "fake"):
                 lm = FakeChatModel()
-            case ("openai", "o4-mini-2025-04-16"):
+            case ("openai", model_name):
                 lm = ChatOpenAI(
                     # 인증키를 가진 클라이언트를 주입받아서, ChatModel의 생성자 인자로 넣어주고,
                     # ChatModel과 인증을 분리하는 패턴을 의도했으나,
@@ -36,7 +36,7 @@ def create_lms(
                     api_key=clients["sync_http_openai"]
                     .headers["authorization"]
                     .split(" ")[-1],
-                    model=lm_spec["model"],
+                    model=model_name,
                 )
             case _:
                 raise ValueError

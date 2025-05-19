@@ -2,16 +2,16 @@
     "state_schema": "message_list",
     "lms": [
         {
-            "id": "openai-o4-mini",            
+            "id": "openai-4o",            
             "provider": "openai",
-            "model": "o4-mini-2025-04-16"
+            "model": "gpt-4o"
         }
     ],
     "nodes": [
         {
             "type": "chat",
             "id": "chat",
-            "reasoning_model":"openai-o4-mini"
+            "reasoning_model":"openai-4o"
         }
     ],
     "edges": [
