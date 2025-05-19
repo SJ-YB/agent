@@ -1,0 +1,27 @@
+{
+    "type": "ReActAgentSpec",
+    "state_schema": "message_list",
+    "lms": [
+        {
+            "id": "openai-4o",            
+            "provider": "openai",
+            "model": "gpt-4o"
+        }
+    ],
+    
+    "chat_node": {
+        "type": "chat",
+        "id": "reasoning",
+        "reasoning_model":"openai-4o"
+    },
+    "tools": [
+        {
+            "id": "tool_0",
+            "type": "MyTool"
+        },
+        {
+            "id": "tool_1",
+            "type": "MyTool"
+        }
+    ]
+}

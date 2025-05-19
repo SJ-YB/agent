@@ -1,0 +1,10 @@
+{
+    "type": "MultiAgentSpec",
+    "supervisor": {
+        "spec_path": "./supervisor.json"
+    },
+    "workers": [
+        {"spec_path": "./qa_agent.json"},
+        {"spec_path": "./simsa_agent.json"}
+    ]
+}
