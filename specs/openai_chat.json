@@ -1,0 +1,21 @@
+{
+    "state_schema": "message_list",
+    "lms": [
+        {
+            "id": "openai-o4-mini",            
+            "provider": "openai",
+            "model": "o4-mini-2025-04-16"
+        }
+    ],
+    "nodes": [
+        {
+            "type": "chat",
+            "id": "chat",
+            "reasoning_model":"openai-o4-mini"
+        }
+    ],
+    "edges": [
+        {"src": "start", "dst": "chat"},
+        {"src": "chat", "dst": "end"}
+    ]
+}

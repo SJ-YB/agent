@@ -36,6 +36,7 @@ def fake_dummy_chat_graph(
 ) -> CompiledStateGraph:
     lms = create_lms(
         lm_specs=fake_chat_graph_spec_dict["lms"],
+        clients={},
     )
     nodes = create_nodes(
         node_specs=fake_chat_graph_spec_dict["nodes"],

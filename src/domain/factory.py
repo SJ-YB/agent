@@ -1,8 +1,10 @@
 from typing import Any
 
 import msgspec
+from httpx import AsyncClient
 from langchain_core.language_models import BaseChatModel
 from langchain_core.language_models.fake_chat_models import FakeChatModel
+from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
@@ -15,13 +17,27 @@ from src.domain.vo.edge import Edge, NodeId
 
 def create_lms(
     lm_specs: list[dict[str, str]],
+    clients: dict[str, AsyncClient] = {},
 ) -> dict[str, BaseChatModel]:
     lms: dict[str, BaseChatModel] = {}
 
     for lm_spec in lm_specs:
+        lm: BaseChatModel
         match (lm_spec["provider"], lm_spec["model"]):
             case ("langchain", "fake"):
                 lm = FakeChatModel()
+            case ("openai", "o4-mini-2025-04-16"):
+                lm = ChatOpenAI(
+                    # 인증키를 가진 클라이언트를 주입받아서, ChatModel의 생성자 인자로 넣어주고,
+                    # ChatModel과 인증을 분리하는 패턴을 의도했으나,
+                    # ChatOpenAI가 인증키를 가진 http클라이언트를 생성자 인자로 받아도,
+                    # 내부적으로 다시 클라이언트를 만들도록 구현되어 있습니다.
+                    # 따라서, 아래와 같이 api_key 생성자의 인자로 넣어줍니다.
+                    api_key=clients["sync_http_openai"]
+                    .headers["authorization"]
+                    .split(" ")[-1],
+                    model=lm_spec["model"],
+                )
             case _:
                 raise ValueError
 
