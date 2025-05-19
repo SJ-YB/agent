@@ -1,0 +1,21 @@
+{
+    "state_schema": "message_list",
+    "lms": [
+        {
+            "id": "openai-4o",            
+            "provider": "openai",
+            "model": "gpt-4o"
+        }
+    ],
+    "nodes": [
+        {
+            "type": "chat",
+            "id": "chat",
+            "reasoning_model":"openai-4o"
+        }
+    ],
+    "edges": [
+        {"src": "start", "dst": "chat"},
+        {"src": "chat", "dst": "end"}
+    ]
+}

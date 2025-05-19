@@ -3,15 +3,40 @@ from dependency_injector import containers, providers
 from src.application.agent import AgentApplication
 from src.domain.factory import create_edges, create_graph, create_lms, create_nodes
 from src.domain.service.graph import GraphService
-from src.infrastructure.factory import create_http_client
+from src.infrastructure.factory import (
+    create_async_http_client,
+    create_async_openai_client,
+    create_sync_http_client,
+    create_sync_openai_client,
+)
 
 
 class InfrastructureContainer(containers.DeclarativeContainer):
     env_config = providers.Configuration()
 
-    openai = providers.Resource(
-        create_http_client,
-        enabled=env_config.infrastructure.openai.enalbed,
+    sync_openai = providers.Resource(
+        create_sync_openai_client,
+        enabled=env_config.infrastructure.openai.enabled,
+        api_key=env_config.infrastructure.openai.api_key,
+        base_url=env_config.infrastructure.openai.base_url,
+    )
+
+    async_openai = providers.Resource(
+        create_async_openai_client,
+        enabled=env_config.infrastructure.openai.enabled,
+        api_key=env_config.infrastructure.openai.api_key,
+        base_url=env_config.infrastructure.openai.base_url,
+    )
+
+    http_async_openai = providers.Resource(
+        create_async_http_client,
+        enabled=env_config.infrastructure.openai.enabled,
+        api_key=env_config.infrastructure.openai.api_key,
+        base_url=env_config.infrastructure.openai.base_url,
+    )
+    http_sync_openai = providers.Resource(
+        create_sync_http_client,
+        enabled=env_config.infrastructure.openai.enabled,
         api_key=env_config.infrastructure.openai.api_key,
         base_url=env_config.infrastructure.openai.base_url,
     )
@@ -19,10 +44,19 @@ class InfrastructureContainer(containers.DeclarativeContainer):
 
 class GraphContainer(containers.DeclarativeContainer):
     graph_config = providers.Configuration()
+    infrastructure_cont = providers.DependenciesContainer()
 
     lms = providers.Singleton(
         create_lms,
         lm_specs=graph_config.lms.provided,
+        clients=providers.Dict(
+            {
+                "async_openai": infrastructure_cont.async_openai,
+                "sync_openai": infrastructure_cont.sync_openai,
+                "async_http_openai": infrastructure_cont.http_async_openai,
+                "sync_http_openai": infrastructure_cont.http_sync_openai,
+            }
+        ),
     )
     nodes = providers.Singleton(
         create_nodes,
@@ -62,6 +96,7 @@ class Container(containers.DeclarativeContainer):
     graph_cont = providers.Container(
         GraphContainer,
         graph_config=graph_config,
+        infrastructure_cont=infrastructure_cont,
     )
 
     service = providers.Container(
