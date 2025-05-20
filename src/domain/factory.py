@@ -5,12 +5,14 @@ from httpx import AsyncClient
 from langchain_core.language_models import BaseChatModel
 from langchain_core.language_models.fake_chat_models import FakeChatModel
 from langchain_openai import ChatOpenAI
+from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from src.domain.entity.node import NodeTypes
 from src.domain.entity.node.base import Node
 from src.domain.entity.node.chat import ChatNode
+from src.domain.entity.state import StateTypes
 from src.domain.entity.state.base import State
 from src.domain.vo.edge import Edge, NodeId
 
@@ -95,11 +97,17 @@ def create_graph(
     state_schema_class: str,
     nodes: dict[NodeId, Node[State]],
     edges: list[Edge],
+    checkpoint_saver: BaseCheckpointSaver[str] | None,
 ) -> CompiledStateGraph:
+    state_schema: type[StateTypes]
     match state_schema_class:
         case "message_list":
             from src.domain.entity.state.messages import (
                 MessageListState as state_schema,
+            )
+        case "single_message":
+            from src.domain.entity.state.messages import (
+                SingleMessageState as state_schema,
             )
         case _:
             raise ValueError
@@ -120,4 +128,6 @@ def create_graph(
         dst_id = END if edge.dst == "end" else edge.dst
         graph_builder.add_edge(src_id, dst_id)
 
-    return graph_builder.compile()
+    return graph_builder.compile(
+        checkpointer=checkpoint_saver,
+    )

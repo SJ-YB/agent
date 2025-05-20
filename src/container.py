@@ -1,4 +1,5 @@
 from dependency_injector import containers, providers
+from langgraph.checkpoint.memory import InMemorySaver
 
 from src.application.agent import AgentApplication
 from src.domain.factory import create_edges, create_graph, create_lms, create_nodes
@@ -42,9 +43,22 @@ class InfrastructureContainer(containers.DeclarativeContainer):
     )
 
 
+class RepositoryContainer(containers.DeclarativeContainer):
+    env_config = providers.Configuration()
+
+    checkpoint_saver = providers.Selector(
+        env_config.repository.checkpoint_saver,
+        memory=providers.Singleton(
+            InMemorySaver,
+        ),
+        null=providers.Object(),
+    )
+
+
 class GraphContainer(containers.DeclarativeContainer):
     graph_config = providers.Configuration()
     infrastructure_cont = providers.DependenciesContainer()
+    repository_cont = providers.DependenciesContainer()
 
     lms = providers.Singleton(
         create_lms,
@@ -72,6 +86,7 @@ class GraphContainer(containers.DeclarativeContainer):
         state_schema_class=graph_config.state_schema,
         nodes=nodes,
         edges=edges,
+        checkpoint_saver=repository_cont.checkpoint_saver,
     )
 
 
@@ -93,10 +108,16 @@ class Container(containers.DeclarativeContainer):
         env_config=env_config,
     )
 
+    repository_cont = providers.Container(
+        RepositoryContainer,
+        env_config=env_config,
+    )
+
     graph_cont = providers.Container(
         GraphContainer,
         graph_config=graph_config,
         infrastructure_cont=infrastructure_cont,
+        repository_cont=repository_cont,
     )
 
     service = providers.Container(

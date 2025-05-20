@@ -8,6 +8,7 @@ def test_chat_endpoint_response(
         url="/api/v1/chat",
         json={
             "id": "test_id",
+            "thread_id": "test_thread",
             "message": "test message",
         },
     )

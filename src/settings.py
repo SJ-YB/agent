@@ -19,10 +19,20 @@ class InfrastructureSetttings(BaseModel):
     openai: OpenaiSettings
 
 
+class Infrastructure(StrEnum):
+    MEMORY = auto()
+    NULL = auto()
+
+
+class RepositorySettings(BaseModel):
+    checkpoint_saver: Infrastructure
+
+
 class Settings(BaseSettings):
     service_name: ServiceName
     graph_spec_path: Path
     infrastructure: InfrastructureSetttings
+    repository: RepositorySettings
 
     model_config = SettingsConfigDict(
         env_file=Path(".env"),

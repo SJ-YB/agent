@@ -1,5 +1,5 @@
 from src.domain.entity.state import StateTypes
-from src.domain.service.graph import GraphService
+from src.domain.service.graph import GraphInput, GraphService
 
 
 class AgentApplication:
@@ -11,6 +11,6 @@ class AgentApplication:
 
     def process(
         self,
-        state: StateTypes,
+        graph_input: GraphInput,
     ) -> StateTypes:
-        return self.graph_service.do(state)
+        return self.graph_service.do(graph_input=graph_input)

@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from typing import Any, TypeAlias, cast
+from langgraph.checkpoint.memory import InMemorySaver
 import msgspec
 import pytest
 from fastapi.testclient import TestClient
@@ -30,9 +31,15 @@ def fake_llm() -> FakeChatModel:
 
 
 @pytest.fixture
+def fake_checkpoint_saver() -> InMemorySaver:
+    return InMemorySaver()
+
+
+@pytest.fixture
 def fake_dummy_chat_graph(
     fake_chat_graph_spec_dict: dict[str, Any],
     fake_llm: FakeChatModel,
+    fake_checkpoint_saver: InMemorySaver,
 ) -> CompiledStateGraph:
     lms = create_lms(
         lm_specs=fake_chat_graph_spec_dict["lms"],
@@ -49,6 +56,7 @@ def fake_dummy_chat_graph(
         state_schema_class=fake_chat_graph_spec_dict["state_schema"],
         nodes=nodes,
         edges=edges,
+        checkpoint_saver=fake_checkpoint_saver,
     )
 
 
