@@ -1,5 +1,5 @@
-import msgspec
+from pydantic import BaseModel
 
 
-class State(msgspec.Struct):
+class State(BaseModel):
     id: str

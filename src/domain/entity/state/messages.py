@@ -7,9 +7,9 @@ from langgraph.graph.message import add_messages
 from src.domain.entity.state.base import State
 
 
-class SingleMessageState(State, tag="single_message"):
+class SingleMessageState(State):
     message: Annotated[str, add]
 
 
-class MessageListState(State, tag="message_list"):
+class MessageListState(State):
     messages: Annotated[list[BaseMessage], add_messages]

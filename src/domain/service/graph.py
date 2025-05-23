@@ -1,9 +1,15 @@
 from typing import Any, Type, cast
 
 import msgspec
+from langchain_core.runnables import RunnableConfig
 from langgraph.graph.state import CompiledStateGraph
 
 from src.domain.entity.state import StateTypes
+
+
+class GraphInput(msgspec.Struct):
+    state: StateTypes
+    config: RunnableConfig = {}
 
 
 class GraphService:
@@ -17,11 +23,16 @@ class GraphService:
     ) -> None:
         self.graph = graph
 
-    def do(self, state: StateTypes) -> StateTypes:
-        return self._create_state(self.graph.invoke(state))
+    def do(self, graph_input: GraphInput) -> StateTypes:
+        return self._create_state(
+            self.graph.invoke(
+                input=graph_input.state,
+                config=graph_input.config,
+            )
+        )
 
     def _create_state(self, graph_output: dict[str, Any] | Any) -> StateTypes:
-        return msgspec.convert(
-            graph_output,
-            type=cast(Type[StateTypes], self.graph.builder.schema),
+        state_cls = cast(Type[StateTypes], self.graph.builder.schema)
+        return state_cls.model_validate(
+            obj=graph_output,
         )
